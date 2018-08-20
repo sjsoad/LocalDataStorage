@@ -39,27 +39,25 @@ open class DefaultLocalDataStorage: LocalDataStorage {
     
     open func fetchAll<ManagedType: NSManagedObject>(from objectsClass: ManagedType.Type, withPredicate predicate: NSPredicate? = nil,
                                                      orderedBy sortDescriptors: [NSSortDescriptor]? = nil) -> [ManagedType]? {
-        if let predicate = predicate {
-            return ManagedType.all(with: predicate, orderedBy: sortDescriptors, in: AERecord.Context.default)
-        } else {
+        guard let predicate = predicate else {
             return ManagedType.all(orderedBy: sortDescriptors, in: AERecord.Context.default)
         }
+        return ManagedType.all(with: predicate, orderedBy: sortDescriptors, in: AERecord.Context.default)
     }
     
     open func fetchOne<ManagedType: NSManagedObject>(from objectClass: ManagedType.Type,
                                                      withPredicate predicate: NSPredicate? = nil) -> ManagedType? {
-        if let predicate = predicate {
-            return ManagedType.first(with: predicate)
-        } else {
+        guard let predicate = predicate else {
             return ManagedType.first()
         }
+        return ManagedType.first(with: predicate)
     }
     
     @discardableResult
     open func create<ManagedType: NSManagedObject>(into: ManagedType.Type, quantity: Int,
                                                    with setup:@escaping (Int, ManagedType) -> Void) -> [ManagedType] {
         var createdObjects: [ManagedType] = []
-        for index  in 0..<quantity {
+        for index in 0..<quantity {
             let managedObject = ManagedType.create()
             setup(index, managedObject)
             createdObjects.append(managedObject)
@@ -71,7 +69,7 @@ open class DefaultLocalDataStorage: LocalDataStorage {
     open func updateObjects<ManagedType: NSManagedObject>(from: ManagedType.Type, predicate: NSPredicate? = nil,
                                                           with update:@escaping (Int, ManagedType) -> Void) {
         guard let objectsToUpdate = fetchAll(from: ManagedType.self, withPredicate: predicate, orderedBy: nil) else { return }
-        for (index, object) in objectsToUpdate.enumerated() {
+        objectsToUpdate.enumerated().forEach { (index, object) in
             update(index, object)
         }
         save()
