@@ -28,12 +28,11 @@ public protocol LocalDataStorage {
 
 open class DefaultLocalDataStorage: LocalDataStorage {
     
-    public init() {
+    public init(storeType type: String = NSSQLiteStoreType) {
         do {
-            try AERecord.loadCoreDataStack()
+            try AERecord.loadCoreDataStack(storeType: type)
         } catch {
-            print(error)
-            fatalError()
+            fatalError(error.localizedDescription)
         }
     }
     
